@@ -1,0 +1,19 @@
+# Normalise line endings: store LF in the repo, check out LF everywhere.
+# Needed because development happens on Windows (WSL2) and CRLF breaks
+# shell scripts, Dockerfiles and YAML inside Linux containers.
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files: never touch their bytes.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.pdf  binary
+*.docx binary
+*.zip  binary
+*.ttf  binary
+*.jar  binary
