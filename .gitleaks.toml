@@ -1,0 +1,10 @@
+# Secret scanning config (security.yml). Extends the default ruleset.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Local-development-only credentials, documented in ADR-010 and .env.example. Never used outside docker compose on a developer machine."
+paths = [
+  '''infra/seaweedfs/s3\.dev\.json''',
+  '''\.env\.example''',
+]
