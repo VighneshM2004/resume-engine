@@ -1,0 +1,67 @@
+# uv workspace root (ADR-013). One lock file (uv.lock) pins every Python
+# dependency of every member, so engine/ and backend/ can never drift apart.
+[project]
+name = "resume-engine-workspace"
+version = "0.0.0"
+description = "Workspace root: shared dev tooling only, not a package."
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14",
+    "mypy>=1.18",
+    "pytest>=8.4",
+    "pytest-cov>=7.0",
+    "httpx>=0.28",
+    "boto3-stubs[s3]>=1.40",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["engine", "backend"]
+
+[tool.uv.sources]
+resume-engine = { workspace = true }
+backend = { workspace = true }
+
+# ---------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "B",        # bugbear
+    "UP",       # pyupgrade
+    "S",        # bandit (security)
+    "SIM",      # simplify
+    "RUF",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "resume_engine"]
+
+[tool.ruff.lint.per-file-ignores]
+# assert is how pytest works; tests use deliberately fake credentials.
+"**/tests/**" = ["S101", "S105", "S106"]
+
+# ---------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+files = ["engine/src", "backend/app"]
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["engine/tests", "backend/tests"]
+addopts = "-ra --strict-markers --import-mode=importlib"
+markers = [
+    "integration: needs the compose stack running (make up)",
+]

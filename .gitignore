@@ -1,0 +1,40 @@
+# --- Secrets: never committed (see docs/SECURITY.md) ---
+.env
+.env.*
+!.env.example
+
+# --- Data and models: downloaded or produced by scripts, never committed ---
+/data/
+/models/
+/taxonomy/esco_skills.csv
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# --- Flutter / Dart ---
+app/.dart_tool/
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/android/local.properties
+app/android/key.properties
+*.keystore
+*.jks
+
+# --- Editors / OS ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
