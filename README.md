@@ -6,6 +6,12 @@ correct, search and export.
 
 > **Status:** M0 (foundations). See `docs/DECISIONS.md` for design decisions.
 
+## Context
+
+A portfolio project built from an in-house training brief written at Zenera
+Labs. "TalentBridge Staffing Solutions" is the brief's fictional client; no
+real client or candidate data is involved.
+
 ## Authorship
 
 The code in this repository is written by Claude (Anthropic) and reviewed line

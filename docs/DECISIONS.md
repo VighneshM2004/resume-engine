@@ -33,11 +33,17 @@ supersedes the old one; old records are never edited away.
 **Context.** No single public dataset labels every field the schema needs
 (name, contacts, skills, jobs, education, certifications), and accuracy claims
 need a held-out set nobody trained on.
-**Decision.** Train on public labeled sets (skills/NER spans) plus a synthetic
-format-robustness set; evaluate on a 150-resume hand-labeled gold set
-(stratified by format), split 30 validation / 120 frozen test.
-**Alternatives.** Public data only: doesn't cover all fields, and its label
-quality is unknown. Label everything by hand: too slow for the timeline.
+**Decision.** Real resumes come from the Kaggle LiveCareer resume dataset
+(`snehaanbhawal/resume-dataset`: about 2,484 resumes as PDF + text, labeled
+only with one of 24 job categories). Hand-label 150 of them for every field,
+stratified by category and layout, as the gold set: 30 validation / 120 frozen
+test. Training adds public skill/NER span sets and a synthetic set rendered to
+DOCX and scanned images (the Kaggle data is PDF/text only). If contact fields
+are scrubbed in the source, Faker identities are injected into headers so
+name/email/phone can be measured.
+**Alternatives.** Use the Kaggle category labels directly: they label the job
+family, not fields, so they can't measure extraction. Public NER sets only:
+skills-heavy, unknown label quality. Label everything by hand: too slow.
 **Consequences.** Labeling is the largest early cost (risk table, PRD §11);
 inter-annotator agreement must be reported before the gold set is trusted.
 
@@ -98,9 +104,11 @@ evidence of skill.
 ## ADR-007: Data in the public repository
 
 **Context.** The repo is public (portfolio); resumes are personal data.
-**Decision.** Only public-licence or synthetic (Faker-generated) resumes appear
-in fixtures, tests, screenshots and demos. `data/` is git-ignored and filled by
-scripts with checksums.
+**Decision.** Only synthetic (Faker-generated) resumes appear in fixtures,
+tests, screenshots and demos. The Kaggle LiveCareer data (scraped, licence not
+stated) is never committed or shown: `data/` is git-ignored and filled by a
+download script (Kaggle API token in `~/.kaggle/kaggle.json`, never in the
+repo) that verifies checksums.
 **Alternatives.** Private repo: defeats the portfolio purpose.
 **Consequences.** gitleaks plus a PII regex check run in CI.
 
