@@ -27,13 +27,13 @@ class SystemStatusScreen extends ConsumerWidget {
       ),
       body: status.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => _Unavailable(
-          reason: 'Something went wrong',
-          onRetry: refresh,
-        ),
+        error: (_, _) =>
+            _Unavailable(reason: 'Something went wrong', onRetry: refresh),
         data: (value) => switch (value) {
-          ApiUnavailable(:final reason) =>
-            _Unavailable(reason: reason, onRetry: refresh),
+          ApiUnavailable(:final reason) => _Unavailable(
+            reason: reason,
+            onRetry: refresh,
+          ),
           final ApiReachable reachable => _StatusList(status: reachable),
         },
       ),
@@ -85,11 +85,7 @@ class _StatusList extends StatelessWidget {
         _StatusTile(label: 'Ready for traffic (/ready)', ok: status.ready),
         const Divider(),
         for (final check in status.checks)
-          _StatusTile(
-            label: check.name,
-            ok: check.ok,
-            detail: check.errorCode,
-          ),
+          _StatusTile(label: check.name, ok: check.ok, detail: check.errorCode),
       ],
     );
   }

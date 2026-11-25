@@ -30,11 +30,7 @@ final class ApiUnavailable extends ServiceStatus {
 }
 
 final class DependencyCheck {
-  const DependencyCheck({
-    required this.name,
-    required this.ok,
-    this.errorCode,
-  });
+  const DependencyCheck({required this.name, required this.ok, this.errorCode});
 
   final String name;
   final bool ok;

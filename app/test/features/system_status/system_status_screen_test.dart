@@ -15,13 +15,17 @@ class _FakeRepository implements StatusRepository {
 
   @override
   Future<ServiceStatus> fetch() async {
-    final result = _results[calls < _results.length ? calls : _results.length - 1];
+    final result =
+        _results[calls < _results.length ? calls : _results.length - 1];
     calls++;
     return result;
   }
 }
 
-Future<void> _pumpScreen(WidgetTester tester, _FakeRepository repository) async {
+Future<void> _pumpScreen(
+  WidgetTester tester,
+  _FakeRepository repository,
+) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [statusRepositoryProvider.overrideWithValue(repository)],
@@ -54,8 +58,9 @@ void main() {
     expect(find.bySemanticsLabel('Failing'), findsNothing);
   });
 
-  testWidgets('names the failing dependency and its error code',
-      (tester) async {
+  testWidgets('names the failing dependency and its error code', (
+    tester,
+  ) async {
     const notReady = ApiReachable(
       live: true,
       ready: false,
@@ -77,8 +82,9 @@ void main() {
     expect(find.bySemanticsLabel('Failing'), findsNWidgets(2));
   });
 
-  testWidgets('unreachable API shows the reason and Retry re-fetches',
-      (tester) async {
+  testWidgets('unreachable API shows the reason and Retry re-fetches', (
+    tester,
+  ) async {
     final repository = _FakeRepository([
       const ApiUnavailable('Cannot connect to http://localhost:8000'),
       _ready,
