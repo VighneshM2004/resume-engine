@@ -32,7 +32,8 @@ final class HttpStatusRepository implements StatusRepository {
     required Response<Object?> ready,
   }) {
     final healthBody = health.data;
-    final live = health.statusCode == 200 &&
+    final live =
+        health.statusCode == 200 &&
         healthBody is Map<String, Object?> &&
         healthBody['status'] == 'ok';
 
@@ -71,12 +72,11 @@ final class HttpStatusRepository implements StatusRepository {
   }
 
   String _describe(DioException e) => switch (e.type) {
-        DioExceptionType.connectionTimeout ||
-        DioExceptionType.sendTimeout ||
-        DioExceptionType.receiveTimeout =>
-          'The API did not respond in time',
-        DioExceptionType.connectionError =>
-          'Cannot connect to ${_dio.options.baseUrl}',
-        _ => 'Request to the API failed',
-      };
+    DioExceptionType.connectionTimeout ||
+    DioExceptionType.sendTimeout ||
+    DioExceptionType.receiveTimeout => 'The API did not respond in time',
+    DioExceptionType.connectionError =>
+      'Cannot connect to ${_dio.options.baseUrl}',
+    _ => 'Request to the API failed',
+  };
 }

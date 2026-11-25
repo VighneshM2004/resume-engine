@@ -17,20 +17,19 @@ class _FakeAdapter implements HttpClientAdapter {
     RequestOptions options,
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
-  ) async =>
-      _handler(options);
+  ) async => _handler(options);
 
   @override
   void close({bool force = false}) {}
 }
 
 ResponseBody _json(int status, Object body) => ResponseBody.fromString(
-      jsonEncode(body),
-      status,
-      headers: {
-        Headers.contentTypeHeader: [Headers.jsonContentType],
-      },
-    );
+  jsonEncode(body),
+  status,
+  headers: {
+    Headers.contentTypeHeader: [Headers.jsonContentType],
+  },
+);
 
 HttpStatusRepository _repository(
   ResponseBody Function(RequestOptions options) handler,
@@ -96,23 +95,22 @@ void main() {
     expect(redis.errorCode, 'REDIS_UNAVAILABLE');
   });
 
-  test('a connection failure becomes ApiUnavailable, not an exception',
-      () async {
-    final repository = _repository(
-      (options) => throw DioException(
-        requestOptions: options,
-        type: DioExceptionType.connectionError,
-      ),
-    );
+  test(
+    'a connection failure becomes ApiUnavailable, not an exception',
+    () async {
+      final repository = _repository(
+        (options) => throw DioException(
+          requestOptions: options,
+          type: DioExceptionType.connectionError,
+        ),
+      );
 
-    final status = await repository.fetch();
+      final status = await repository.fetch();
 
-    expect(status, isA<ApiUnavailable>());
-    expect(
-      (status as ApiUnavailable).reason,
-      contains('http://api.test'),
-    );
-  });
+      expect(status, isA<ApiUnavailable>());
+      expect((status as ApiUnavailable).reason, contains('http://api.test'));
+    },
+  );
 
   test('an unexpected /ready body becomes ApiUnavailable', () async {
     final repository = _repository(
