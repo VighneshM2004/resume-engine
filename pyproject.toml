@@ -21,11 +21,12 @@ dev = [
 package = false
 
 [tool.uv.workspace]
-members = ["engine", "backend"]
+members = ["engine", "backend", "ml"]
 
 [tool.uv.sources]
 resume-engine = { workspace = true }
 backend = { workspace = true }
+resume-ml = { workspace = true }
 
 # ---------------------------------------------------------------- ruff
 [tool.ruff]
@@ -45,7 +46,7 @@ select = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["app", "resume_engine"]
+known-first-party = ["app", "resume_engine", "resume_ml"]
 
 [tool.ruff.lint.per-file-ignores]
 # assert is how pytest works; tests use deliberately fake credentials.
@@ -56,11 +57,11 @@ known-first-party = ["app", "resume_engine"]
 python_version = "3.12"
 strict = true
 warn_unreachable = true
-files = ["engine/src", "backend/app"]
+files = ["engine/src", "backend/app", "ml/src"]
 
 # ---------------------------------------------------------------- pytest
 [tool.pytest.ini_options]
-testpaths = ["engine/tests", "backend/tests"]
+testpaths = ["engine/tests", "backend/tests", "ml/tests"]
 addopts = "-ra --strict-markers --import-mode=importlib"
 markers = [
     "integration: needs the compose stack running (make up)",
