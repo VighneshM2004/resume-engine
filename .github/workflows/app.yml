@@ -25,24 +25,42 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # The workflow file can change before the Flutter project exists (M0).
+      # Skip cleanly instead of failing on a missing directory.
+      - name: detect Flutter project
+        id: detect
+        working-directory: .
+        run: |
+          if [ -f app/pubspec.yaml ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "No app/pubspec.yaml yet: Flutter checks skipped." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - uses: subosito/flutter-action@v2
+        if: steps.detect.outputs.exists == 'true'
         with:
           channel: stable
           cache: true
 
-      - run: flutter pub get
+      - if: steps.detect.outputs.exists == 'true'
+        run: flutter pub get
 
       - name: dart format
+        if: steps.detect.outputs.exists == 'true'
         run: dart format --output=none --set-exit-if-changed .
 
       - name: flutter analyze (infos are errors)
+        if: steps.detect.outputs.exists == 'true'
         run: flutter analyze --fatal-infos
 
       - name: widget tests
+        if: steps.detect.outputs.exists == 'true'
         run: flutter test --coverage
 
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && steps.detect.outputs.exists == 'true'
         with:
           name: flutter-coverage
           path: app/coverage/lcov.info
