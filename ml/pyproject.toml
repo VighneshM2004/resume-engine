@@ -1,0 +1,16 @@
+[project]
+name = "resume-ml"
+version = "0.1.0"
+description = "Data preparation, training and evaluation for resume-engine."
+requires-python = ">=3.12,<3.13"
+dependencies = ["resume-engine"]
+
+[project.scripts]
+resume-ml = "resume_ml.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/resume_ml"]

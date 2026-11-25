@@ -16,6 +16,9 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 COPY engine/pyproject.toml engine/pyproject.toml
 COPY backend/pyproject.toml backend/pyproject.toml
+# Every workspace member's pyproject must exist for uv to read the lock;
+# ml/ itself is not installed in this image.
+COPY ml/pyproject.toml ml/pyproject.toml
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --package backend --no-install-workspace
 
