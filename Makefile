@@ -4,7 +4,7 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 COMPOSE := docker compose
-PYTEST_COV := --cov=app --cov=resume_engine --cov-report=term-missing --cov-report=xml
+PYTEST_COV := --cov=app --cov=resume_engine --cov=resume_ml --cov-report=term-missing --cov-report=xml
 
 .PHONY: help
 help: ## Show this help
@@ -55,6 +55,12 @@ test-integration: ## Integration tests against the running stack (run `make up` 
 check: lint typecheck test ## Everything CI's unit job runs
 
 # ---------------------------------------------------------------- ml
-.PHONY: evaluate
+.PHONY: data splits evaluate
+data: ## Verify the Kaggle archive, extract PDFs, write records and the profile report
+	uv run resume-ml data
+
+splits: ## Create the frozen gold/train split file (once; refuses to overwrite)
+	uv run resume-ml splits
+
 evaluate: ## Reproduce the gold-set evaluation (arrives in M3)
 	@echo "evaluate: not implemented yet (milestone M3)" && exit 1
