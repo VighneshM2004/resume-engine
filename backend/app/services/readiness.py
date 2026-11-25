@@ -6,18 +6,23 @@ in the server log; clients only see the dependency name and a fixed code,
 so a probe can't leak hostnames, credentials or stack traces.
 """
 
+from __future__ import annotations
+
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import boto3
 import psycopg
 import redis
 from botocore.config import Config as BotoConfig
-from mypy_boto3_s3 import S3Client
 
 from app.core.config import Settings
+
+if TYPE_CHECKING:
+    # Type stubs are a dev dependency only; never import them at runtime.
+    from mypy_boto3_s3 import S3Client
 
 logger = logging.getLogger(__name__)
 
