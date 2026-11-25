@@ -51,7 +51,9 @@ void main() {
     for (final name in ['database', 'redis', 'storage']) {
       expect(find.text(name), findsOneWidget);
     }
-    expect(find.bySemanticsLabel('Failing'), findsNothing);
+    // /health, /ready and three dependencies.
+    expect(find.byIcon(Icons.check_circle), findsNWidgets(5));
+    expect(find.byIcon(Icons.error), findsNothing);
   });
 
   testWidgets('names the failing dependency and its error code',
@@ -73,8 +75,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('REDIS_UNAVAILABLE'), findsOneWidget);
-    // /ready tile and the redis tile.
-    expect(find.bySemanticsLabel('Failing'), findsNWidgets(2));
+    // The /ready tile and the redis tile.
+    expect(find.byIcon(Icons.error), findsNWidgets(2));
   });
 
   testWidgets('unreachable API shows the reason and Retry re-fetches',
