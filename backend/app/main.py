@@ -10,15 +10,20 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import health
-from app.core.config import Settings, get_settings
+from app.core.config import CorsSettings, Settings, get_settings
 from app.services.readiness import Check, default_checks, ensure_bucket, make_s3_client
 
 logger = logging.getLogger(__name__)
 
 
-def create_app(settings: Settings | None = None, checks: list[Check] | None = None) -> FastAPI:
+def create_app(
+    settings: Settings | None = None,
+    checks: list[Check] | None = None,
+    cors_origins: list[str] | None = None,
+) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         if checks is not None:
@@ -39,6 +44,15 @@ def create_app(settings: Settings | None = None, checks: list[Check] | None = No
         title="resume-engine API",
         version="0.1.0",
         lifespan=lifespan,
+    )
+    origins = cors_origins if cors_origins is not None else CorsSettings().cors_allowed_origins
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_methods=["GET", "POST", "PATCH", "DELETE"],
+        allow_headers=["Authorization", "Content-Type"],
+        # Auth uses a bearer token header, not cookies.
+        allow_credentials=False,
     )
     app.include_router(health.router)
     return app
