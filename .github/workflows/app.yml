@@ -41,6 +41,8 @@ jobs:
       - uses: subosito/flutter-action@v2
         if: steps.detect.outputs.exists == 'true'
         with:
+          # Pinned to the version the app was created with; bump deliberately.
+          flutter-version: 3.50.1
           channel: stable
           cache: true
 
@@ -58,6 +60,10 @@ jobs:
       - name: widget tests
         if: steps.detect.outputs.exists == 'true'
         run: flutter test --coverage
+
+      - name: release web build
+        if: steps.detect.outputs.exists == 'true'
+        run: flutter build web --release
 
       - uses: actions/upload-artifact@v4
         if: always() && steps.detect.outputs.exists == 'true'
