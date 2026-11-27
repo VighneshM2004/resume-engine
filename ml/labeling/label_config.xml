@@ -1,0 +1,29 @@
+<!--
+  Label Studio interface for the gold set (docs/LABELING_GUIDE.md).
+  Entry spans (JOB_ENTRY, EDU_ENTRY) group the field spans inside them, so a
+  job's title, company and dates are tied together by containment rather
+  than by relations, which are slow to draw.
+-->
+<View>
+  <Header value="$category · $id · $split"/>
+  <Labels name="label" toName="text">
+    <Label value="SKILL" background="#2563eb" hotkey="s"/>
+    <Label value="JOB_ENTRY" background="#d1d5db" hotkey="j"/>
+    <Label value="JOB_TITLE" background="#16a34a" hotkey="t"/>
+    <Label value="COMPANY" background="#0d9488" hotkey="c"/>
+    <Label value="JOB_DATES" background="#65a30d" hotkey="d"/>
+    <Label value="EDU_ENTRY" background="#e9d5ff" hotkey="e"/>
+    <Label value="DEGREE" background="#9333ea" hotkey="g"/>
+    <Label value="INSTITUTION" background="#c026d3" hotkey="i"/>
+    <Label value="EDU_DATES" background="#a855f7" hotkey="y"/>
+    <Label value="CERTIFICATION" background="#ea580c" hotkey="r"/>
+    <Label value="LOCATION" background="#ca8a04" hotkey="l"/>
+  </Labels>
+  <Text name="text" value="$text" granularity="word"/>
+  <Header value="Is this document usable as a resume?" size="6"/>
+  <Choices name="quality" toName="text" choice="single" required="true">
+    <Choice value="usable"/>
+    <Choice value="unusable"/>
+  </Choices>
+  <TextArea name="notes" toName="text" placeholder="Anything ambiguous (optional)" rows="2"/>
+</View>

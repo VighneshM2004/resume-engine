@@ -55,12 +55,26 @@ test-integration: ## Integration tests against the running stack (run `make up` 
 check: lint typecheck test ## Everything CI's unit job runs
 
 # ---------------------------------------------------------------- ml
-.PHONY: data splits evaluate
+.PHONY: data splits label label-down label-tasks label-import evaluate
 data: ## Verify the Kaggle archive, extract PDFs, write records and the profile report
 	uv run resume-ml data
 
 splits: ## Create the frozen gold/train split file (once; refuses to overwrite)
 	uv run resume-ml splits
+
+label: .env ## Start Label Studio at http://localhost:8081
+	$(COMPOSE) --profile labeling up -d label-studio
+	@echo "Label Studio: http://localhost:$${LABEL_STUDIO_PORT:-8081}  (login from .env)"
+
+label-down: ## Stop Label Studio (labels are kept in its volume)
+	$(COMPOSE) --profile labeling stop label-studio
+
+label-tasks: ## Write data/labeling/gold_tasks.json to import into Label Studio
+	uv run resume-ml label-tasks
+
+label-import: ## Validate an export: make label-import EXPORT=path/to/export.json [PARTIAL=1]
+	@test -n "$(EXPORT)" || (echo "usage: make label-import EXPORT=path/to/export.json" && exit 1)
+	uv run resume-ml label-import "$(EXPORT)" $(if $(PARTIAL),--partial,)
 
 evaluate: ## Reproduce the gold-set evaluation (arrives in M3)
 	@echo "evaluate: not implemented yet (milestone M3)" && exit 1

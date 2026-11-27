@@ -7,15 +7,20 @@ resume-ml splits    create the frozen split file (refuses to overwrite)
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
 from resume_ml.data import kaggle
+from resume_ml.labeling import gold
 
 DEFAULT_ARCHIVE = Path("data/raw/kaggle-resume-dataset.zip")
 DEFAULT_OUT = Path("data/interim/kaggle")
 DEFAULT_SPLITS = Path("ml/splits/kaggle_v1.json")
 DEFAULT_PROFILE = Path("ml/reports/kaggle_profile.md")
+DEFAULT_RECORDS = DEFAULT_OUT / "records.jsonl"
+DEFAULT_TASKS = Path("data/labeling/gold_tasks.json")
+DEFAULT_GOLD = Path("data/gold/kaggle_gold_v1.jsonl")
 
 
 def _load(archive: Path) -> tuple[list[kaggle.ResumeRecord], list[kaggle.Duplicate]]:
@@ -74,6 +79,44 @@ def cmd_splits(args: argparse.Namespace) -> int:
     return 0
 
 
+def _read_splits(path: Path) -> kaggle.Splits:
+    if not path.exists():
+        raise kaggle.DatasetError(f"{path} not found: run `make splits` first")
+    return kaggle.Splits.from_json(path.read_text(encoding="utf-8"))
+
+
+def cmd_label_tasks(args: argparse.Namespace) -> int:
+    splits = _read_splits(args.splits)
+    if not args.records.exists():
+        raise kaggle.DatasetError(f"{args.records} not found: run `make data` first")
+    with args.records.open(encoding="utf-8") as f:
+        records = [json.loads(line) for line in f]
+    tasks = gold.build_tasks(records, splits.gold_validation, splits.gold_test)
+    args.tasks.parent.mkdir(parents=True, exist_ok=True)
+    args.tasks.write_text(json.dumps(tasks, ensure_ascii=False), encoding="utf-8")
+    print(f"wrote {len(tasks)} tasks to {args.tasks} (validation first)")
+    return 0
+
+
+def cmd_label_import(args: argparse.Namespace) -> int:
+    splits = _read_splits(args.splits)
+    tasks = json.loads(args.export.read_text(encoding="utf-8"))
+    expected = None if args.partial else [*splits.gold_validation, *splits.gold_test]
+    try:
+        records, report = gold.convert_export(tasks, expected)
+    except gold.GoldError as e:
+        print("export breaks the labeling rules; fix these in Label Studio:", file=sys.stderr)
+        print("  " + str(e).replace("\n", "\n  "), file=sys.stderr)
+        return 1
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text("".join(r.to_json() + "\n" for r in records), encoding="utf-8")
+    print(f"wrote {report.records} gold records ({report.usable} usable) to {args.out}")
+    print(f"jobs: {report.jobs}, education entries: {report.education}")
+    for label, n in report.label_counts.items():
+        print(f"  {label:<14} {n}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="resume-ml")
     parser.add_argument("--archive", type=Path, default=DEFAULT_ARCHIVE)
@@ -87,6 +130,19 @@ def build_parser() -> argparse.ArgumentParser:
 
     splits = sub.add_parser("splits", help="create the frozen gold/train split file")
     splits.set_defaults(func=cmd_splits)
+
+    tasks = sub.add_parser("label-tasks", help="write the Label Studio import file")
+    tasks.add_argument("--records", type=Path, default=DEFAULT_RECORDS)
+    tasks.add_argument("--tasks", type=Path, default=DEFAULT_TASKS)
+    tasks.set_defaults(func=cmd_label_tasks)
+
+    imp = sub.add_parser("label-import", help="validate a Label Studio export")
+    imp.add_argument("export", type=Path, help="JSON export from Label Studio")
+    imp.add_argument("--out", type=Path, default=DEFAULT_GOLD)
+    imp.add_argument(
+        "--partial", action="store_true", help="allow unlabeled gold resumes (mid-way checks)"
+    )
+    imp.set_defaults(func=cmd_label_import)
     return parser
 
 

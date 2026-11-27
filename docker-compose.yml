@@ -79,7 +79,23 @@ services:
       - "127.0.0.1:${API_PORT:-8000}:8000"
     restart: unless-stopped
 
+  label-studio:
+    # Gold-set labeling only (docs/LABELING_GUIDE.md). Not part of `make up`:
+    # starts with `make label`.
+    profiles: ["labeling"]
+    image: heartexlabs/label-studio:1.23.2
+    environment:
+      LABEL_STUDIO_USERNAME: ${LABEL_STUDIO_USERNAME}
+      LABEL_STUDIO_PASSWORD: ${LABEL_STUDIO_PASSWORD}
+      LABEL_STUDIO_DISABLE_SIGNUP_WITHOUT_LINK: "true"
+    volumes:
+      - labelstudio:/label-studio/data
+    ports:
+      - "127.0.0.1:${LABEL_STUDIO_PORT:-8081}:8080"
+    restart: unless-stopped
+
 volumes:
+  labelstudio:
   pgdata:
   redisdata:
   storagedata:
